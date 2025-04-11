@@ -1,0 +1,15 @@
+FROM php:8.3-apache
+
+RUN apt-get update && \
+    apt-get install -y libyaml-dev && \
+    pecl install yaml && \
+    docker-php-ext-enable yaml && \
+    docker-php-ext-install pdo pdo_mysql && \
+    a2enmod rewrite
+
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+COPY apache-config-mvc.conf /etc/apache2/sites-available/apache-config-mvc.conf
+
+RUN a2ensite apache-config-mvc.conf
+
+

@@ -1,0 +1,5 @@
+driver: 'mysql'
+host: 'mysql'
+dbname: 'projekt'
+username: 'projekt'
+password: 'projekt'

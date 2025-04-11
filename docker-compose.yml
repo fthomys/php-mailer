@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  apache:
+    build:
+      context: .
+      dockerfile: Dockerfile.apache
+    container_name: php-mailer-web
+    restart: always
+    ports:
+      - "8081:81"
+      - "8082:82"
+    volumes:
+      - ./mvc:/var/www/mvc
+      - ./php:/var/www/html
+      - ./apache-config.conf:/etc/apache2/sites-available/000-default.conf
+      - ./apache-config-mvc.conf:/etc/apache2/sites-available/apache-config-mvc.conf
+    depends_on:
+      - mysql
+    command: ["/bin/sh", "-c", "apache2-foreground"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: php-mailer-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: projekt
+      MYSQL_USER: projekt
+      MYSQL_PASSWORD: projekt
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+volumes:
+  mysql_data:

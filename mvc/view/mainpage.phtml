@@ -1,0 +1,77 @@
+<?php
+$user = $_SESSION['user'] ?? null;
+?>
+
+<style>
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .animated-gradient {
+        background: linear-gradient(270deg, #0f172a, #1f2937, #0f172a);
+        background-size: 600% 600%;
+        animation: gradientShift 32s ease infinite;
+    }
+</style>
+
+<style>
+    @keyframes textGradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .animated-text-gradient {
+        background: linear-gradient(270deg, #ec4899, #f43f5e, #ec4899);
+        background-size: 200% 200%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: textGradient 12s ease infinite;
+    }
+</style>
+
+
+<div class="min-h-screen text-white flex flex-col animated-gradient">
+
+    <main class="flex flex-1 items-center justify-center px-4">
+        <div class="max-w-2xl text-center">
+            <h1 class="text-4xl sm:text-5xl font-extrabold mb-6 leading-tight animated-text-gradient">
+                Willkommen beim PHPMailer Chat
+            </h1>
+
+            <p class="text-gray-300 mb-8 text-lg">
+                Ein einfaches Chatsystem, das auf PHP und MySQL basiert. <br>
+                <span class="text-pink-400">Erstelle deinen eigenen Chatraum</span> und chatte mit Freunden oder Kollegen. <br>
+                Kein Bullshit!
+            </p>
+
+            <?php if (!$user): ?>
+                <div class="space-x-4">
+                    <a href="/auth/register" class="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg shadow transition text-lg">Jetzt starten</a>
+                    <a href="/auth/login" class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Einloggen</a>
+                </div>
+            <?php else: ?>
+                <a href="/app" class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Ab in den Chat</a>
+            <?php endif; ?>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-sm text-gray-500 border-t border-gray-700 mt-8">
+        Made with ☕ + 💌  | <?= date('Y') ?> | <span class="text-pink-400">PHPMailer Chat</span>
+    </footer>
+</div>
