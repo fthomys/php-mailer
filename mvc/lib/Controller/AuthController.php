@@ -79,8 +79,14 @@ class AuthController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flakegen = Snowflake::getInstance();
             $username = trim($_POST['username']);
+            $username = preg_replace('/[^a-zA-Z0-9_.-]/', '', $username);
+            $displayname = $_POST['displayname'];
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
+
+            if (empty($displayname) || $displayname == '') {
+                $displayname = $username;
+            }
 
             if (empty($username) || empty($password)) {
                 $errors[] = "Please fill in all fields.";
@@ -112,8 +118,8 @@ class AuthController extends Controller
                     $snowflake = $flakegen->generate();
                     $insert = (new Insert($this->connection))
                         ->into(new User())
-                        ->columns(['id', 'username', 'password_hash'])
-                        ->values([$snowflake, $username, password_hash($_POST['password'], PASSWORD_DEFAULT)])
+                        ->columns(['id', 'username', 'password_hash', 'display_name'])
+                        ->values([$snowflake, $username, password_hash($_POST['password'], PASSWORD_DEFAULT), $displayname])
                         ->executeStmt();
 
 
@@ -156,7 +162,7 @@ class AuthController extends Controller
     private function createSession(int $userid) : array
     {
         return [
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $userid,
             'session_created_at' => time()
         ];
 

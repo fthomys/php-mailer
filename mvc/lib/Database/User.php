@@ -15,7 +15,8 @@ class User implements Table
             'id',
             'username',
             'password_hash',
-            'created_at'
+            'created_at',
+            'display_name'
         ];
     }
 
