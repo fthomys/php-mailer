@@ -1,6 +1,6 @@
 FROM php:8.3-apache
 
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y libyaml-dev && \
     pecl install yaml && \
     docker-php-ext-enable yaml && \
