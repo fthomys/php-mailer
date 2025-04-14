@@ -23,20 +23,23 @@ class Select
         $this->connection = $connection;
     }
 
-    public function from(Table $table): void
+    public function from(Table $table): static
     {
         $this->table = $table;
+        return $this;
     }
 
-    public function columns(array $columns): void
+    public function columns(array $columns): static
     {
         $this->columns = $columns;
+        return $this;
     }
 
-    public function where(string $whereStmt, array $whereData): void
+    public function where(string $whereStmt, array $whereData): static
     {
         $this->whereStmt = $whereStmt;
         $this->whereData = $whereData;
+        return $this;
     }
 
     public function fetchAll(): array
