@@ -10,7 +10,7 @@ class View
 
     protected string $title;
 
-    protected array $data;
+    protected array $data = [];
 
     protected array $stylesheets = [];
 
@@ -55,6 +55,7 @@ class View
 
     public function render(): string
     {
+        extract($this->data);
         ob_start();
 
         include $this->outerlayout;

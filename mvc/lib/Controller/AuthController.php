@@ -44,11 +44,13 @@ class AuthController extends Controller
 
                 $user = $select->fetchAll();
 
-                if (!$user || !password_verify($password, $user['password_hash'])) {
+
+                if (!$user || !password_verify($password, $user[0]['password_hash'])) {
                     $errors[] = "Invalid username or password.";
                 } else {
 
-                    $userid = $user['id'];
+                    $userid = $user[0]['id'];
+
 
 
                     $_SESSION = $this->createSession($userid);

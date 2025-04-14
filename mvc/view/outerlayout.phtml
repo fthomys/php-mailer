@@ -14,9 +14,9 @@
 </head>
 
 <?php
-$user = $_SESSION['user'] ?? null;
+$userid = $_SESSION['user_id'] ?? null;
 
-$avatarUrl = $user['avatar'] ?? 'https://i.pravatar.cc/40?u=' . ($user['id'] ?? 'guest');
+$avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
 
 ?>
 
@@ -26,7 +26,7 @@ $avatarUrl = $user['avatar'] ?? 'https://i.pravatar.cc/40?u=' . ($user['id'] ?? 
     </a>
 
     <nav class="flex items-center space-x-6 text-sm text-gray-300">
-        <?php if ($user): ?>
+        <?php if ($userid): ?>
             <a href="/app" class="hover:text-white transition">Chat</a>
 
             <!-- 👤 Profile Dropdown -->
@@ -36,7 +36,7 @@ $avatarUrl = $user['avatar'] ?? 'https://i.pravatar.cc/40?u=' . ($user['id'] ?? 
                     <img src="<?= htmlspecialchars($avatarUrl) ?>"
                          alt="avatar"
                          class="w-8 h-8 rounded-full object-cover border border-gray-600">
-                    <span><?= htmlspecialchars($user['username']) ?></span>
+                    <span><?= htmlspecialchars($username) ?></span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 opacity-70" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
