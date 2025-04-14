@@ -3,6 +3,8 @@
 <body class="bg-gray-100 dark:bg-gray-900">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $this->title?> </title>
     <?php foreach($this->headscripts as $headscript): ?>
         <script src="<?= $headscript ?>"></script>
@@ -29,7 +31,6 @@ $avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
         <?php if ($userid): ?>
             <a href="/app" class="hover:text-white transition">Chat</a>
 
-            <!-- 👤 Profile Dropdown -->
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open"
                         class="flex items-center space-x-2 hover:text-white focus:outline-none transition">
@@ -44,7 +45,6 @@ $avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
                     </svg>
                 </button>
 
-                <!-- Dropdown menu -->
                 <div x-show="open"
                      @click.away="open = false"
                      x-transition

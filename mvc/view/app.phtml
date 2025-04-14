@@ -1,0 +1,176 @@
+<?php
+$datas = $this->data;
+?>
+
+<div class="flex h-screen bg-[#0f172a] text-white">
+    <!-- Sidebar -->
+    <div class="w-64 bg-[#111827] p-4 flex flex-col justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-pink-500 mb-6">PHP Mailer Chat</h2>
+            <p class="text-sm mb-4">Hallo, <span class="text-pink-400 font-semibold"><?= htmlspecialchars($datas["username"]) ?></span> 👋</p>
+
+            <h3 class="text-pink-400 text-sm uppercase font-bold mb-2">Andere Benutzer</h3>
+            <ul class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+                <?php foreach ($datas["users"] as $user): ?>
+                    <li class="text-gray-300 hover:text-pink-400 cursor-pointer transition" data-userid="<?= $user['id'] ?>">
+                        <?= htmlspecialchars($user['display_name'] ?? $user['username']) ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
+        <a href="/auth/logout" class="text-sm text-pink-500 hover:underline mt-4 block">Logout</a>
+    </div>
+
+    <!-- Chat area -->
+    <div class="flex flex-col flex-1">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-[#1f2937] bg-[#1e293b]">
+            <h1 class="text-xl font-semibold text-pink-400">Chatraum</h1>
+        </div>
+
+        <!-- Chat messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0f172a]">
+
+        </div>
+
+        <!-- Message input -->
+        <div class="px-6 py-4 border-t border-[#1f2937] bg-[#1e293b]">
+            <form id="message-form" class="flex space-x-2">
+                <input
+                    type="text"
+                    name="message"
+                    placeholder="Nachricht schreiben..."
+                    class="flex-1 px-4 py-2 rounded bg-[#334155] text-white focus:outline-none"
+                    autocomplete="off"
+                />
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
+                >
+                    Senden
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const messageForm = document.getElementById('message-form');
+        const messageInput = messageForm.querySelector('input[name="message"]');
+        const chatBox = document.getElementById('chat-messages');
+        let receiverId = null;
+        let lastMessageId = null;
+        let pendingMessages = [];
+
+        const myUserId = <?= json_encode($_SESSION['user_id']) ?>;
+
+        document.querySelectorAll('ul li').forEach(li => {
+            li.addEventListener('click', () => {
+                receiverId = li.dataset.userid;
+                lastMessageId = null;
+                chatBox.innerHTML = '';
+                pendingMessages = [];
+                fetchMessages(true);
+            });
+        });
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text || !receiverId) return;
+
+            const tempId = 'tmp-' + Date.now();
+            pendingMessages.push({ id: tempId, sender_id: myUserId, message: text, pending: true });
+            renderMessages(true);
+
+            messageInput.value = '';
+
+            fetch('/message/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `receiver_id=${encodeURIComponent(receiverId)}&message=${encodeURIComponent(text)}`
+            })
+                .then(res => res.json())
+                .then(() => {
+                    pendingMessages = pendingMessages.filter(p => p.message !== text);
+                    fetchMessages(false);
+                });
+        });
+
+
+        let lastFetchedMessagesJSON = null;
+
+        function fetchMessages(forceScroll = false) {
+            if (!receiverId) return;
+
+            fetch(`/message/fetch?with=${receiverId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const jsonNow = JSON.stringify(data);
+                    const changed = jsonNow !== lastFetchedMessagesJSON;
+
+                    if (!changed && pendingMessages.length === 0) return;
+
+                    data.forEach(serverMsg => {
+                        pendingMessages = pendingMessages.filter(pending => {
+                            if (pending.sender_id !== myUserId) return true;
+                            return pending.message.trim() !== serverMsg.message.trim();
+                        });
+                    });
+
+                    lastFetchedMessagesJSON = jsonNow;
+                    renderMessages(forceScroll, data);
+                });
+        }
+
+
+
+        function renderMessages(forceScroll, serverMessages = []) {
+            const isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 50;
+            chatBox.innerHTML = '';
+
+            [...serverMessages, ...pendingMessages].forEach(msg => {
+                const isMe = msg.sender_id == myUserId;
+                const bubble = document.createElement('div');
+                bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+
+                const timestamp = msg.sent_at
+                    ? new Date(msg.sent_at).toLocaleTimeString()
+                    : new Date().toLocaleTimeString();
+
+                let statusIcon = '';
+                if (isMe) {
+                    statusIcon = msg.pending
+                        ? `<span class="ml-2 text-white/50 text-xs">⏳</span>`
+                        : msg.read_at
+                            ? `<span class="ml-2 text-green-400 text-xs">✅</span>`
+                            : `<span class="ml-2 text-white/50 text-xs">✔️</span>`;
+                }
+
+
+                bubble.innerHTML = `
+                <div class="max-w-md px-4 py-2 rounded-2xl ${
+                    isMe ? 'bg-pink-500 text-white rounded-br-none' : 'bg-gray-700 text-white rounded-bl-none'
+                } shadow">
+                    <p class="text-sm break-words">${msg.message}</p>
+                    <div class="flex justify-end text-[10px] mt-1 text-white/50">
+                        ${timestamp}
+                        ${statusIcon}
+                    </div>
+                </div>
+            `;
+                chatBox.appendChild(bubble);
+            });
+
+            if (forceScroll || isAtBottom) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        setInterval(() => {
+            if (receiverId) fetchMessages(false);
+        }, 1500);
+    });
+</script>
