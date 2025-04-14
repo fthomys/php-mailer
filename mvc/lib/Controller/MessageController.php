@@ -28,6 +28,32 @@ class MessageController extends Controller
             return;
         }
 
+        // Rate Limiting - Token Bucket: 5 messages per 2 seconds
+        $now = microtime(true);
+        $bucket = &$_SESSION['rate_limit'][$senderId]['bucket'];
+        $lastCheck = &$_SESSION['rate_limit'][$senderId]['last_check'];
+
+        if (!isset($bucket)) {
+            $bucket = 5;
+            $lastCheck = $now;
+        }
+
+        $elapsed = $now - $lastCheck;
+        $refillRate = 5 / 2;
+
+        $tokensToAdd = floor($elapsed * $refillRate);
+        if ($tokensToAdd > 0) {
+            $bucket = min(1, $bucket + $tokensToAdd);
+            $lastCheck = $now;
+        }
+
+        if ($bucket <= 0) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many requests, please wait.']);
+            return;
+        }
+
+        $bucket--;
 
         $flakegen = Snowflake::getInstance();
 
@@ -42,12 +68,15 @@ class MessageController extends Controller
             ])
             ->executeStmt();
 
-
         echo json_encode(['status' => 'gesendet']);
     }
 
+
     public function fetchAction(): void
     {
+
+
+
         if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['error' => 'Nicht eingeloggt']);

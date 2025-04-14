@@ -56,6 +56,40 @@ $datas = $this->data;
 </div>
 
 <script>
+
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+
+        const colors = {
+            success: 'bg-green-500 border-green-300',
+            error: 'bg-red-500 border-red-300',
+            info: 'bg-pink-600 border-pink-400',
+            warning: 'bg-yellow-400 text-black border-yellow-300'
+        };
+
+        const base = `
+        fixed bottom-8 left-1/2 transform -translate-x-1/2
+        max-w-xs w-auto px-4 py-2 rounded-lg
+        border shadow-lg text-white text-sm font-medium
+        z-50 transition-opacity duration-300
+    `;
+
+        toast.className = `${base} ${colors[type] || colors.info}`;
+        toast.textContent = message;
+
+        toast.style.backdropFilter = 'blur(6px)';
+        toast.style.opacity = '1';
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+
     document.addEventListener('DOMContentLoaded', () => {
         const messageForm = document.getElementById('message-form');
         const messageInput = messageForm.querySelector('input[name="message"]');
@@ -92,11 +126,27 @@ $datas = $this->data;
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `receiver_id=${encodeURIComponent(receiverId)}&message=${encodeURIComponent(text)}`
             })
-                .then(res => res.json())
-                .then(() => {
+                .then(async res => {
+                    if (res.status === 429) {
+                        const data = await res.json();
+                        showToast(data.error || 'Du sendest zu schnell!', 'error');
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        const data = await res.json();
+                        showToast(data.error || 'Fehler beim Senden', 'error');
+                        return;
+                    }
+
                     pendingMessages = pendingMessages.filter(p => p.message !== text);
                     fetchMessages(false);
+                })
+                .catch(err => {
+                    showToast('Verbindungsfehler 😬', 'error');
+                    console.error(err);
                 });
+
         });
 
 
