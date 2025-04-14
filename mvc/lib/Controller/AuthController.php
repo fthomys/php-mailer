@@ -6,6 +6,7 @@ namespace PhpMailer\Controller;
 use PhpMailer\Controller;
 use PhpMailer\Database\User;
 use PhpMailer\Insert;
+use PhpMailer\Library\Snowflake\Snowflake;
 use PhpMailer\Select;
 use PhpMailer\View;
 use PhpTraining\Database\Manufacturer;
@@ -41,15 +42,16 @@ class AuthController extends Controller
                 $select->from($userModel)
                     ->where('username = :username', ['username' => $username]);
 
-                $user = $select->fetch();
+                $user = $select->fetchAll();
 
                 if (!$user || !password_verify($password, $user['password_hash'])) {
                     $errors[] = "Invalid username or password.";
                 } else {
-                    // Successful login → start session
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['session_created_at'] = time();
+
+                    $userid = $user['id'];
+
+
+                    $_SESSION = $this->createSession($userid);
 
                     header('Location: /app');
                     exit;
@@ -75,6 +77,7 @@ class AuthController extends Controller
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $flakegen = Snowflake::getInstance();
             $username = trim($_POST['username']);
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
@@ -106,10 +109,11 @@ class AuthController extends Controller
             if (empty($errors)) {
                 if (isset($_POST['submit'])) {
                     $username = $_POST['username'];
+                    $snowflake = $flakegen->generate();
                     $insert = (new Insert($this->connection))
                         ->into(new User())
-                        ->columns(['username', 'password_hash'])
-                        ->values([$username, password_hash($_POST['password'], PASSWORD_DEFAULT)])
+                        ->columns(['id', 'username', 'password_hash'])
+                        ->values([$snowflake, $username, password_hash($_POST['password'], PASSWORD_DEFAULT)])
                         ->executeStmt();
 
 
@@ -119,12 +123,7 @@ class AuthController extends Controller
                     $_SESSION['session_created_at'] = time();
 
 */
-                    $user = [
-                        'username' => $username,
-                        'session_created_at' => time()
-                    ];
-
-                    $_SESSION['user'] = $user;
+                    $_SESSION = $this->createSession($snowflake);
 
                     header('Location: /app');
                 }
@@ -151,6 +150,16 @@ class AuthController extends Controller
         session_destroy();
         header('Location: /');
         exit;
+    }
+
+
+    private function createSession(int $userid) : array
+    {
+        return [
+            'user_id' => $_SESSION['user_id'],
+            'session_created_at' => time()
+        ];
+
     }
 
 }
