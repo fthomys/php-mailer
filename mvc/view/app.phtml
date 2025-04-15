@@ -54,10 +54,8 @@ $datas = $this->data;
         </div>
     </div>
 </div>
-
 <script>
-
-
+    // ✅ Globale Methoden
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');
 
@@ -69,11 +67,11 @@ $datas = $this->data;
         };
 
         const base = `
-        fixed bottom-8 left-1/2 transform -translate-x-1/2
-        max-w-xs w-auto px-4 py-2 rounded-lg
-        border shadow-lg text-white text-sm font-medium
-        z-50 transition-opacity duration-300
-    `;
+            fixed bottom-8 left-1/2 transform -translate-x-1/2
+            max-w-xs w-auto px-4 py-2 rounded-lg
+            border shadow-lg text-white text-sm font-medium
+            z-50 transition-opacity duration-300
+        `;
 
         toast.className = `${base} ${colors[type] || colors.info}`;
         toast.textContent = message;
@@ -89,21 +87,67 @@ $datas = $this->data;
         }, 3000);
     }
 
+    function confirmDeleteMessage(messageId, buttonElement) {
+        if (buttonElement?.disabled) return;
+        if (!confirm('Willst du diese Nachricht wirklich löschen?')) return;
+
+        buttonElement.disabled = true;
+        buttonElement.textContent = '...';
+
+        deleteMessage(messageId, buttonElement);
+    }
+
+    function deleteMessage(messageId, buttonElement = null) {
+        fetch('/message/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `message_id=${encodeURIComponent(messageId)}`
+        })
+            .then(async res => {
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    const error = data?.error || 'Löschen fehlgeschlagen';
+                    showToast(error, 'error');
+                    if (buttonElement) {
+                        buttonElement.disabled = false;
+                        buttonElement.textContent = '🗑️';
+                    }
+                    return;
+                }
+
+                const messageElement = document.querySelector(`[data-id="${messageId}"]`);
+                if (messageElement?.parentElement) {
+                    messageElement.parentElement.remove();
+                }
+
+                showToast('Nachricht gelöscht', 'success');
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Fehler beim Löschen der Nachricht', 'error');
+                if (buttonElement) {
+                    buttonElement.disabled = false;
+                    buttonElement.textContent = '🗑️';
+                }
+            });
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         const messageForm = document.getElementById('message-form');
         const messageInput = messageForm.querySelector('input[name="message"]');
         const chatBox = document.getElementById('chat-messages');
-        let receiverId = null;
-        let lastMessageId = null;
-        let pendingMessages = [];
+        const myUserId = <?= json_encode((string)$_SESSION['user_id']) ?>;
 
-        const myUserId = <?= json_encode($_SESSION['user_id']) ?>;
+        let receiverId = null;
+        let lastFetchedMessagesJSON = null;
+        let pendingMessages = [];
 
         document.querySelectorAll('ul li').forEach(li => {
             li.addEventListener('click', () => {
                 receiverId = li.dataset.userid;
-                lastMessageId = null;
+                lastFetchedMessagesJSON = null;
                 chatBox.innerHTML = '';
                 pendingMessages = [];
                 fetchMessages(true);
@@ -118,7 +162,6 @@ $datas = $this->data;
             const tempId = 'tmp-' + Date.now();
             pendingMessages.push({ id: tempId, sender_id: myUserId, message: text, pending: true });
             renderMessages(true);
-
             messageInput.value = '';
 
             fetch('/message/send', {
@@ -127,15 +170,11 @@ $datas = $this->data;
                 body: `receiver_id=${encodeURIComponent(receiverId)}&message=${encodeURIComponent(text)}`
             })
                 .then(async res => {
-                    if (res.status === 429) {
-                        const data = await res.json();
-                        showToast(data.error || 'Du sendest zu schnell!', 'error');
-                        return;
-                    }
+                    const data = await res.json();
 
-                    if (!res.ok) {
-                        const data = await res.json();
-                        showToast(data.error || 'Fehler beim Senden', 'error');
+                    if (res.status === 429 || !res.ok || !data) {
+                        const error = data?.error || 'Fehler beim Senden';
+                        showToast(error, 'error');
                         return;
                     }
 
@@ -143,14 +182,10 @@ $datas = $this->data;
                     fetchMessages(false);
                 })
                 .catch(err => {
-                    showToast('Verbindungsfehler 😬', 'error');
                     console.error(err);
+                    showToast('Verbindungsfehler 😬', 'error');
                 });
-
         });
-
-
-        let lastFetchedMessagesJSON = null;
 
         function fetchMessages(forceScroll = false) {
             if (!receiverId) return;
@@ -163,10 +198,10 @@ $datas = $this->data;
 
                     if (!changed && pendingMessages.length === 0) return;
 
+                    // Pending auflösen falls Server-Message vorhanden
                     data.forEach(serverMsg => {
                         pendingMessages = pendingMessages.filter(pending => {
-                            if (pending.sender_id !== myUserId) return true;
-                            return pending.message.trim() !== serverMsg.message.trim();
+                            return pending.sender_id !== myUserId || pending.message.trim() !== serverMsg.message.trim();
                         });
                     });
 
@@ -175,17 +210,17 @@ $datas = $this->data;
                 });
         }
 
-
-
         function renderMessages(forceScroll, serverMessages = []) {
             const isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 50;
             chatBox.innerHTML = '';
 
             [...serverMessages, ...pendingMessages].forEach(msg => {
-                const isMe = msg.sender_id == myUserId;
+                const isMe = String(msg.sender_id) === myUserId;
                 const bubble = document.createElement('div');
                 bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
+                const msgIdStr = msg.id ? String(msg.id) : '';
+                const messageIdAttr = msgIdStr && !msg.pending ? `data-id="${msgIdStr}"` : '';
                 const timestamp = msg.sent_at
                     ? new Date(msg.sent_at).toLocaleTimeString()
                     : new Date().toLocaleTimeString();
@@ -199,19 +234,35 @@ $datas = $this->data;
                             : `<span class="ml-2 text-white/50 text-xs">✔️</span>`;
                 }
 
-
                 bubble.innerHTML = `
-                <div class="max-w-md px-4 py-2 rounded-2xl ${
+                    <div class="relative group max-w-md px-4 py-2 rounded-2xl ${
                     isMe ? 'bg-pink-500 text-white rounded-br-none' : 'bg-gray-700 text-white rounded-bl-none'
-                } shadow">
-                    <p class="text-sm break-words">${msg.message}</p>
-                    <div class="flex justify-end text-[10px] mt-1 text-white/50">
-                        ${timestamp}
-                        ${statusIcon}
+                } shadow" ${messageIdAttr}>
+                        <p class="text-sm break-words">${msg.message}</p>
+                        <div class="flex justify-end text-[10px] mt-1 text-white/50">
+                            ${timestamp}
+                            ${statusIcon}
+                        </div>
+                        ${isMe && !msg.pending ? `
+                            <button
+                                class="delete-btn absolute top-1 right-1 text-white/60 hover:text-white text-xs hidden group-hover:inline"
+                                title="Nachricht löschen"
+                            >
+                                🗑️
+                            </button>
+                        ` : ''}
                     </div>
-                </div>
-            `;
+                `;
+
                 chatBox.appendChild(bubble);
+            });
+
+            chatBox.querySelectorAll('.delete-btn').forEach(btn => {
+                const parent = btn.closest('[data-id]');
+                const messageId = parent?.dataset?.id;
+                if (messageId) {
+                    btn.onclick = () => confirmDeleteMessage(messageId, btn);
+                }
             });
 
             if (forceScroll || isAtBottom) {

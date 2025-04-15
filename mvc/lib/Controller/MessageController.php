@@ -72,7 +72,7 @@ class MessageController extends Controller
 
         echo json_encode([
             'status' => 'gesendet',
-            'id' => $messageId
+            'id' => (string) $messageId
         ]);
     }
 
@@ -160,6 +160,12 @@ class MessageController extends Controller
 ");
         $updateRead->execute(['me' => $userId, 'them' => $chatPartnerId]);
 
+        foreach ($messages as &$msg) {
+            $msg['id'] = (string)$msg['id'];
+            $msg['sender_id'] = (string)$msg['sender_id'];
+            $msg['receiver_id'] = (string)$msg['receiver_id'];
+        }
+        unset($msg);
 
         echo json_encode($messages);
     }
