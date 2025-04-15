@@ -94,15 +94,11 @@ class MessageController extends Controller
             return;
         }
 
-        error_log($userId);
-        error_log($messageId);
-
 
         $checkStmt = $this->connection->prepare("SELECT * FROM messages WHERE id = :id AND sender_id = :user");
         $checkStmt->execute(['id' => $messageId, 'user' => $userId]);
         $message = $checkStmt->fetch();
 
-        error_log($message);
 
         if (!$message) {
             http_response_code(403);
