@@ -5,12 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $this->title?> </title>
-    <?php foreach($this->headscripts as $headscript): ?>
+    <title><?= $this->title ?> </title>
+    <?php foreach ($this->headscripts as $headscript): ?>
         <script src="<?= $headscript ?>"></script>
     <?php endforeach; ?>
     <?php foreach ($this->stylesheets as $stylesheet): ?>
-    <link rel="stylesheet" href="<?= $stylesheet?>">
+        <link rel="stylesheet" href="<?= $stylesheet ?>">
     <?php endforeach; ?>
 
 </head>
@@ -38,10 +38,11 @@ $avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
                          alt="avatar"
                          class="w-8 h-8 rounded-full object-cover border border-gray-600">
                     <span><?= htmlspecialchars($username) ?></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 opacity-70" fill="none" viewBox="0 0 24 24"
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 opacity-70" fill="none"
+                         viewBox="0 0 24 24"
                          stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M19 9l-7 7-7-7" />
+                              d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
 
@@ -52,7 +53,8 @@ $avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
                     <a href="/profile" class="block px-4 py-2 hover:bg-gray-700 text-sm">Profile</a>
                     <a href="/settings" class="block px-4 py-2 hover:bg-gray-700 text-sm">Settings</a>
                     <div class="border-t border-gray-700 my-1"></div>
-                    <a href="/auth/logout" class="block px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 text-sm">Logout</a>
+                    <a href="/auth/logout"
+                       class="block px-4 py-2 text-red-400 hover:bg-gray-700 hover:text-red-300 text-sm">Logout</a>
                 </div>
             </div>
         <?php else: ?>
@@ -68,15 +70,12 @@ $avatarUrl = 'https://i.pravatar.cc/40?u=' . ($userid ?? 'guest');
 <body>
 
 
-
 <?php $this->renderInnerLayout(); ?>
 
 
-<?php foreach($this->javascripts as $javascripts): ?>
+<?php foreach ($this->javascripts as $javascripts): ?>
     <script src="<?= $javascripts ?>"></script>
 <?php endforeach; ?>
-
-
 
 
 </body>

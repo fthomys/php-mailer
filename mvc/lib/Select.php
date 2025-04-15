@@ -55,7 +55,7 @@ class Select
 
     protected function prepareExec(): ?PDOStatement
     {
-        if (isset($this->columns) && ! in_array('*', $this->columns )) {
+        if (isset($this->columns) && !in_array('*', $this->columns)) {
             $allFound = true;
             foreach ($this->columns as $column) {
                 $found = false;
@@ -76,8 +76,7 @@ class Select
             }
 
             $columns = implode(', ', $this->columns);
-        }
-        else {
+        } else {
             $columns = '*';
         }
 

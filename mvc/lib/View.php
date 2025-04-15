@@ -51,8 +51,6 @@ class View
     }
 
 
-
-
     public function render(): string
     {
         extract($this->data);
@@ -70,7 +68,8 @@ class View
     }
 
 
-    public function addJavascript(string $pathToJS): static{
+    public function addJavascript(string $pathToJS): static
+    {
 
         $this->javascripts[] = $pathToJS;
         return $this;

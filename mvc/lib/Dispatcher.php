@@ -3,8 +3,6 @@
 
 namespace PhpMailer;
 
-use const Dom\NOT_FOUND_ERR;
-
 class Dispatcher
 {
     /** @var string Base url of the application */

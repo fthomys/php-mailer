@@ -26,7 +26,6 @@ class IndexController extends Controller
         }
 
 
-
         $view = new View();
         echo $view->setInnerLayout('../view/mainpage.phtml')
             ->setOuterLayout('../view/outerlayout.phtml')

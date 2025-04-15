@@ -4,8 +4,8 @@ namespace PhpMailer\Controller;
 
 use PhpMailer\Controller;
 use PhpMailer\Database\User;
-use PhpMailer\View;
 use PhpMailer\Select;
+use PhpMailer\View;
 
 class AppController extends Controller
 {

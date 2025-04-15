@@ -31,9 +31,9 @@
             <?php
             $users = ['Anna', 'Max', 'Lisa', 'Tom', 'Julia'];
             foreach ($users as $user): ?>
-            <li class="p-4 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                <a href="#"><?= htmlspecialchars($user) ?></a>
-            </li>
+                <li class="p-4 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <a href="#"><?= htmlspecialchars($user) ?></a>
+                </li>
             <?php endforeach; ?>
         </ul>
     </aside>
@@ -72,8 +72,10 @@
         </div>
 
         <!-- Nachrichteneingabe -->
-        <form id="chatForm" class="p-4 bg-white dark:bg-gray-800 border-t dark:border-gray-700 flex gap-2" onsubmit="return false;">
-            <input id="chatInput" type="text" name="message" placeholder="Nachricht schreiben..." class="flex-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+        <form id="chatForm" class="p-4 bg-white dark:bg-gray-800 border-t dark:border-gray-700 flex gap-2"
+              onsubmit="return false;">
+            <input id="chatInput" type="text" name="message" placeholder="Nachricht schreiben..."
+                   class="flex-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"/>
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                 Senden
             </button>

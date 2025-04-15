@@ -7,12 +7,14 @@ $datas = $this->data;
     <div class="w-64 bg-[#111827] p-4 flex flex-col justify-between">
         <div>
             <h2 class="text-2xl font-bold text-pink-500 mb-6">PHP Mailer Chat</h2>
-            <p class="text-sm mb-4">Hallo, <span class="text-pink-400 font-semibold"><?= htmlspecialchars($datas["username"]) ?></span> 👋</p>
+            <p class="text-sm mb-4">Hallo, <span
+                        class="text-pink-400 font-semibold"><?= htmlspecialchars($datas["username"]) ?></span> 👋</p>
 
             <h3 class="text-pink-400 text-sm uppercase font-bold mb-2">Andere Benutzer</h3>
             <ul class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
                 <?php foreach ($datas["users"] as $user): ?>
-                    <li class="text-gray-300 hover:text-pink-400 cursor-pointer transition" data-userid="<?= $user['id'] ?>">
+                    <li class="text-gray-300 hover:text-pink-400 cursor-pointer transition"
+                        data-userid="<?= $user['id'] ?>">
                         <?= htmlspecialchars($user['display_name'] ?? $user['username']) ?>
                     </li>
                 <?php endforeach; ?>
@@ -38,15 +40,15 @@ $datas = $this->data;
         <div class="px-6 py-4 border-t border-[#1f2937] bg-[#1e293b]">
             <form id="message-form" class="flex space-x-2">
                 <input
-                    type="text"
-                    name="message"
-                    placeholder="Nachricht schreiben..."
-                    class="flex-1 px-4 py-2 rounded bg-[#334155] text-white focus:outline-none"
-                    autocomplete="off"
+                        type="text"
+                        name="message"
+                        placeholder="Nachricht schreiben..."
+                        class="flex-1 px-4 py-2 rounded bg-[#334155] text-white focus:outline-none"
+                        autocomplete="off"
                 />
                 <button
-                    type="submit"
-                    class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
+                        type="submit"
+                        class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
                 >
                     Senden
                 </button>
@@ -100,7 +102,7 @@ $datas = $this->data;
     function deleteMessage(messageId, buttonElement = null) {
         fetch('/message/delete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: `message_id=${encodeURIComponent(messageId)}`
         })
             .then(async res => {
@@ -160,13 +162,13 @@ $datas = $this->data;
             if (!text || !receiverId) return;
 
             const tempId = 'tmp-' + Date.now();
-            pendingMessages.push({ id: tempId, sender_id: myUserId, message: text, pending: true });
+            pendingMessages.push({id: tempId, sender_id: myUserId, message: text, pending: true});
             renderMessages(true);
             messageInput.value = '';
 
             fetch('/message/send', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: `receiver_id=${encodeURIComponent(receiverId)}&message=${encodeURIComponent(text)}`
             })
                 .then(async res => {

@@ -3,7 +3,6 @@
 namespace PhpMailer\Controller;
 
 use PhpMailer\Controller;
-use PhpMailer\View;
 use PhpMailer\Library\Snowflake\Snowflake;
 
 class TestController extends Controller

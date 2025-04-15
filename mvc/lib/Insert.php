@@ -1,17 +1,20 @@
 <?php
+
 namespace PhpMailer;
+
 use PDO;
 use PDOStatement;
 use PhpMailer\Database\Table;
 
-class Insert{
-    protected PDO       $connection;
+class Insert
+{
+    protected PDO $connection;
 
-    protected array     $columns;
+    protected array $columns;
 
-    protected Table    $table;
+    protected Table $table;
 
-    protected array     $values;
+    protected array $values;
 
 
     public function __construct(PDO $connection)
@@ -40,9 +43,9 @@ class Insert{
     public function executeStmt(): static
     {
         $stmt = $this->prepareExec();
-        try{
+        try {
             $stmt->execute();
-        }catch(Throwable $e){
+        } catch (Throwable $e) {
             echo("Exception thrown {$e->getMessage()}");
         }
         return $this;
@@ -50,10 +53,9 @@ class Insert{
 
     protected function prepareExec(): ?PDOStatement
     {
-        if (!isset($this->columns))
-        {
+        if (!isset($this->columns)) {
             $columns = "*";
-        }else {
+        } else {
 
 
             $allFound = true;
@@ -86,7 +88,7 @@ class Insert{
 
         $stmt = $this->connection->prepare($query);
         foreach ($this->values as $key => $value) {
-            $stmt->bindValue($key+1, $value);
+            $stmt->bindValue($key + 1, $value);
         }
 
         return $stmt;

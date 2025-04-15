@@ -72,7 +72,7 @@ class MessageController extends Controller
 
         echo json_encode([
             'status' => 'gesendet',
-            'id' => (string) $messageId
+            'id' => (string)$messageId
         ]);
     }
 
@@ -126,7 +126,6 @@ class MessageController extends Controller
 
     public function fetchAction(): void
     {
-
 
 
         if (!isset($_SESSION['user_id'])) {

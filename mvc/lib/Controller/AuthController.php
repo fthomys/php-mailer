@@ -52,7 +52,6 @@ class AuthController extends Controller
                     $userid = $user[0]['id'];
 
 
-
                     $_SESSION = $this->createSession($userid);
 
                     header('Location: /app');
@@ -72,7 +71,14 @@ class AuthController extends Controller
             ->render();
     }
 
+    private function createSession(int $userid): array
+    {
+        return [
+            'user_id' => $userid,
+            'session_created_at' => time()
+        ];
 
+    }
 
     public function registerAction(): void
     {
@@ -97,7 +103,6 @@ class AuthController extends Controller
             if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $_POST['username'])) {
                 $errors[] = 'Username can only contain letters, numbers, underscore (_), dot (.) and dash (-).';
             }
-
 
 
             if ($password !== $confirm_password) {
@@ -125,12 +130,12 @@ class AuthController extends Controller
                         ->executeStmt();
 
 
-/*
-                    $_SESSION['username'] = $username;
-                    $_SESSION['user_id'] = $this->connection->lastInsertId();
-                    $_SESSION['session_created_at'] = time();
+                    /*
+                                        $_SESSION['username'] = $username;
+                                        $_SESSION['user_id'] = $this->connection->lastInsertId();
+                                        $_SESSION['session_created_at'] = time();
 
-*/
+                    */
                     $_SESSION = $this->createSession($snowflake);
 
                     header('Location: /app');
@@ -152,22 +157,11 @@ class AuthController extends Controller
             ->render();
     }
 
-
     public function logoutAction(): void
     {
         session_destroy();
         header('Location: /');
         exit;
-    }
-
-
-    private function createSession(int $userid) : array
-    {
-        return [
-            'user_id' => $userid,
-            'session_created_at' => time()
-        ];
-
     }
 
 }

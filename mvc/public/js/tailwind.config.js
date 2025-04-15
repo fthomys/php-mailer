@@ -17,18 +17,18 @@ tailwind.config = {
             },
             keyframes: {
                 fadeIn: {
-                    '0%': { opacity: '0', transform: 'translateY(10px)' },
-                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                    '0%': {opacity: '0', transform: 'translateY(10px)'},
+                    '100%': {opacity: '1', transform: 'translateY(0)'},
                 },
                 gradientShift: {
-                    '0%': { backgroundPosition: '0% 50%' },
-                    '50%': { backgroundPosition: '100% 50%' },
-                    '100%': { backgroundPosition: '0% 50%' },
+                    '0%': {backgroundPosition: '0% 50%'},
+                    '50%': {backgroundPosition: '100% 50%'},
+                    '100%': {backgroundPosition: '0% 50%'},
                 },
                 textGradient: {
-                    '0%': { backgroundPosition: '0% 50%' },
-                    '50%': { backgroundPosition: '100% 50%' },
-                    '100%': { backgroundPosition: '0% 50%' },
+                    '0%': {backgroundPosition: '0% 50%'},
+                    '50%': {backgroundPosition: '100% 50%'},
+                    '100%': {backgroundPosition: '0% 50%'},
                 },
             },
         },

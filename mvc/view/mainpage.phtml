@@ -56,22 +56,28 @@ $user = $_SESSION['user_id'] ?? null;
 
             <p class="text-gray-300 mb-8 text-lg">
                 Ein einfaches Chatsystem, das auf PHP und MySQL basiert. <br>
-                <span class="text-pink-400">Erstelle deinen eigenen Chatraum</span> und chatte mit Freunden oder Kollegen. <br>
+                <span class="text-pink-400">Erstelle deinen eigenen Chatraum</span> und chatte mit Freunden oder
+                Kollegen. <br>
                 Kein Bullshit!
             </p>
 
             <?php if (!$user): ?>
                 <div class="space-x-4">
-                    <a href="/auth/register" class="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg shadow transition text-lg">Jetzt starten</a>
-                    <a href="/auth/login" class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Einloggen</a>
+                    <a href="/auth/register"
+                       class="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg shadow transition text-lg">Jetzt
+                        starten</a>
+                    <a href="/auth/login"
+                       class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Einloggen</a>
                 </div>
             <?php else: ?>
-                <a href="/app" class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Ab in den Chat</a>
+                <a href="/app"
+                   class="px-6 py-3 border border-pink-400 text-pink-400 hover:bg-pink-400 hover:text-white rounded-lg transition text-lg">Ab
+                    in den Chat</a>
             <?php endif; ?>
         </div>
     </main>
 
     <footer class="text-center py-4 text-sm text-gray-500 border-t border-gray-700 mt-8">
-        Made with ☕ + 💌  | <?= date('Y') ?> | <span class="text-pink-400">PHPMailer Chat</span>
+        Made with ☕ + 💌 | <?= date('Y') ?> | <span class="text-pink-400">PHPMailer Chat</span>
     </footer>
 </div>
