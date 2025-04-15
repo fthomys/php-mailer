@@ -2,60 +2,107 @@
 $datas = $this->data;
 ?>
 
-<div class="flex h-screen bg-[#0f172a] text-white">
-    <!-- Sidebar -->
-    <div class="w-64 bg-[#111827] p-4 flex flex-col justify-between">
+<div class="flex h-screen bg-gray-900 text-white">
+    <aside class="w-72 bg-gray-800 p-5 flex flex-col justify-between">
         <div>
             <h2 class="text-2xl font-bold text-pink-500 mb-6">PHP Mailer Chat</h2>
-            <p class="text-sm mb-4">Hallo, <span
-                        class="text-pink-400 font-semibold"><?= htmlspecialchars($datas["username"]) ?></span> 👋</p>
 
-            <h3 class="text-pink-400 text-sm uppercase font-bold mb-2">Andere Benutzer</h3>
-            <ul class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+            <p class="text-sm mb-6">
+                Hello, <span class="text-pink-400 font-semibold"><?= htmlspecialchars($datas["username"]) ?></span> 👋
+            </p>
+
+            <h3 class="text-sm font-semibold uppercase text-pink-400 mb-3">Other Users</h3>
+            <ul class="space-y-2 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar" id="user-list">
                 <?php foreach ($datas["users"] as $user): ?>
-                    <li class="text-gray-300 hover:text-pink-400 cursor-pointer transition"
+                    <li class="flex items-center justify-between px-3 py-2 rounded-md cursor-pointer hover:bg-gray-700 transition-colors user-item"
                         data-userid="<?= $user['id'] ?>">
-                        <?= htmlspecialchars($user['display_name'] ?? $user['username']) ?>
+                        <span class="text-gray-300">
+                            <?= htmlspecialchars($user['display_name'] ?? $user['username']) ?>
+                        </span>
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-400"></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
         </div>
 
-        <a href="/auth/logout" class="text-sm text-pink-500 hover:underline mt-4 block">Logout</a>
-    </div>
+        <a href="/auth/logout" class="text-sm text-pink-500 hover:underline">Logout</a>
+    </aside>
 
-    <!-- Chat area -->
-    <div class="flex flex-col flex-1">
-        <!-- Header -->
-        <div class="px-6 py-4 border-b border-[#1f2937] bg-[#1e293b]">
-            <h1 class="text-xl font-semibold text-pink-400">Chatraum</h1>
-        </div>
+    <main class="flex flex-col flex-1">
+        <header class="px-6 py-4 border-b border-gray-700 bg-gray-800 flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-pink-400 flex items-center gap-2">
+                Chat Room
+                <span id="active-user-bubble" class="px-2 py-1 text-xs rounded-full bg-pink-600 text-white hidden">
+                    <!-- Filled dynamically -->
+                </span>
+            </h1>
+        </header>
 
-        <!-- Chat messages -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0f172a]">
+        <section id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-900 custom-scrollbar">
+        </section>
 
-        </div>
-
-        <!-- Message input -->
-        <div class="px-6 py-4 border-t border-[#1f2937] bg-[#1e293b]">
-            <form id="message-form" class="flex space-x-2">
+        <footer class="px-6 py-4 border-t border-gray-700 bg-gray-800">
+            <form id="message-form" class="flex gap-3">
                 <input
                         type="text"
                         name="message"
-                        placeholder="Nachricht schreiben..."
-                        class="flex-1 px-4 py-2 rounded bg-[#334155] text-white focus:outline-none"
+                        placeholder="Type your message..."
+                        class="flex-1 px-4 py-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
                         autocomplete="off"
+                        required
                 />
                 <button
                         type="submit"
-                        class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 transition"
+                        class="px-5 py-2 rounded-md bg-pink-500 text-white font-semibold hover:bg-pink-600 transition-colors duration-200"
                 >
-                    Senden
+                    Send
                 </button>
             </form>
-        </div>
-    </div>
+        </footer>
+    </main>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #f472b6;
+        border-radius: 3px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    .user-item.selected {
+        background-color: #ec4899;
+        color: white;
+    }
+
+    .user-item.selected span:first-child {
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    const userItems = document.querySelectorAll('.user-item');
+    const activeUserBubble = document.getElementById('active-user-bubble');
+
+    userItems.forEach(item => {
+        item.addEventListener('click', () => {
+            userItems.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+
+            const username = item.querySelector('span:first-child').textContent;
+            activeUserBubble.textContent = username;
+            activeUserBubble.classList.remove('hidden');
+        });
+    });
+</script>
+
+
 <script>
     // ✅ Globale Methoden
     function showToast(message, type = 'info') {
@@ -274,6 +321,6 @@ $datas = $this->data;
 
         setInterval(() => {
             if (receiverId) fetchMessages(false);
-        }, 1500);
+        }, 750);
     });
 </script>
