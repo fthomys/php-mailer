@@ -4,6 +4,7 @@ namespace PhpMailer\Controller;
 
 use PhpMailer\Controller;
 use PhpMailer\Database\Message;
+use PhpMailer\Delete;
 use PhpMailer\Insert;
 use PhpMailer\Library\Snowflake\Snowflake;
 use PhpMailer\Select;
@@ -28,7 +29,7 @@ class MessageController extends Controller
             return;
         }
 
-        // Rate Limiting - Token Bucket: 5 messages per 2 seconds
+        // Rate Limiting
         $now = microtime(true);
         $bucket = &$_SESSION['rate_limit'][$senderId]['bucket'];
         $lastCheck = &$_SESSION['rate_limit'][$senderId]['last_check'];
@@ -40,8 +41,8 @@ class MessageController extends Controller
 
         $elapsed = $now - $lastCheck;
         $refillRate = 5 / 2;
-
         $tokensToAdd = floor($elapsed * $refillRate);
+
         if ($tokensToAdd > 0) {
             $bucket = min(1, $bucket + $tokensToAdd);
             $lastCheck = $now;
@@ -56,19 +57,70 @@ class MessageController extends Controller
         $bucket--;
 
         $flakegen = Snowflake::getInstance();
+        $messageId = $flakegen->generate();
 
-        $insert = (new Insert($this->connection))
+        (new Insert($this->connection))
             ->into(new Message())
             ->columns(['id', 'sender_id', 'receiver_id', 'message'])
             ->values([
-                $flakegen->generate(),
+                $messageId,
                 $senderId,
                 $receiverId,
                 $messageText,
             ])
             ->executeStmt();
 
-        echo json_encode(['status' => 'gesendet']);
+        echo json_encode([
+            'status' => 'gesendet',
+            'id' => $messageId
+        ]);
+    }
+
+
+    public function deleteAction(): void
+    {
+        if (!isset($_SESSION['user_id'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Nicht eingeloggt']);
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $messageId = $_POST['message_id'] ?? null;
+
+        if (!$messageId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Keine Nachricht angegeben']);
+            return;
+        }
+
+        error_log($userId);
+        error_log($messageId);
+
+
+        $checkStmt = $this->connection->prepare("SELECT * FROM messages WHERE id = :id AND sender_id = :user");
+        $checkStmt->execute(['id' => $messageId, 'user' => $userId]);
+        $message = $checkStmt->fetch();
+
+        error_log($message);
+
+        if (!$message) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Du darfst diese Nachricht nicht löschen']);
+            return;
+        }
+
+        $deleted = (new Delete($this->connection))
+            ->from(new Message())
+            ->where('id = :id AND sender_id = :sender', ['id' => $messageId, 'sender' => $userId])
+            ->execute();
+
+        if ($deleted) {
+            echo json_encode(['success' => true]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Fehler beim Löschen']);
+        }
     }
 
 
